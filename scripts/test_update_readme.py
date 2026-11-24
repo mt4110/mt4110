@@ -249,8 +249,9 @@ class ConfigTests(unittest.TestCase):
         intro = readme.split(ur.START_MARK)[0]
         for word in ("最強", "鉄壁", "突破不可能"):
             self.assertNotIn(word, intro)
-        self.assertIn("まーきー（竹村正樹）", intro)
-        self.assertIn("テレメトリーなし", intro)
+        # The biography above the markers is the owner's. Do not pin its wording.
+        self.assertIn("# mt4110", intro)
+        self.assertGreater(len(intro.strip()), len("# mt4110"))
         self.assertEqual(readme.count(ur.START_MARK), 1)
         self.assertEqual(readme.count(ur.END_MARK), 1)
 
