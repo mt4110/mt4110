@@ -10,7 +10,13 @@
    ./apply-topics.sh
    ```
 
-   問題なければ、自分の手で付ける。
+   次に GitHub 上の現在の状態を読み取って確認する（この操作では Topic を変更しません）。
+
+   ```bash
+   ./apply-topics.sh --check
+   ```
+
+   問題なければ適用する。適用時も同じ事前確認を繰り返します。
 
    ```bash
    ./apply-topics.sh --apply
