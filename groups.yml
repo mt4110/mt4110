@@ -1,0 +1,163 @@
+# mt4110 プロフィール README のグループ定義。
+# グループ用トピックは各リポジトリに1つだけ付ける。
+# 振り分けの優先順位は scripts/update_readme.py を参照。
+# 一覧の並びは名前の昇順。日英対訳の説明は日本語側だけを残し、長い説明は読みやすい長さに切る。
+
+owner: mt4110
+
+# プロフィール用リポジトリ自身は一覧に出さない。
+skip:
+  - mt4110
+
+groups:
+  - id: veil
+    title: veil シリーズ（セキュリティOSS）
+    topic: group-veil
+    order: 1
+    collapsed: false
+    blurb: シークレットの検出や共有、通信経路の観測など、ローカルで完結するセキュリティ向けのOSSです。
+
+  - id: devtools
+    title: 開発ツール
+    topic: group-devtools
+    order: 2
+    collapsed: false
+    blurb: CLI、テンプレート、CI や作業の補助など、開発の手元で使う道具です。
+
+  - id: japan-data
+    title: 日本向けデータ変換
+    topic: group-japan-data
+    order: 3
+    collapsed: false
+    blurb: 郵便番号や駅名など、日本の公開データを扱いやすくするための変換ツールです。
+
+  - id: macos
+    title: macOSアプリ
+    topic: group-macos
+    order: 4
+    collapsed: false
+    blurb: クラウド同期なしで使う、macOS向けのデスクトップアプリです。
+
+  - id: lab
+    title: 実験・研究
+    topic: group-lab
+    order: 5
+    collapsed: false
+    blurb: 検証用の試作と、お遊びのCLIです。研究・実験用として置いています。
+
+  - id: archive
+    title: アーカイブ
+    topic: group-archive
+    order: 6
+    collapsed: true
+    blurb: 開発を止めたリポジトリと、反例として残しているものです。
+
+uncategorized:
+  title: 未分類
+  blurb: グループ用トピックがまだ付いていない公開リポジトリです。topic を付けると、次回の更新で各グループへ移ります。
+
+# グループ用トピックも、アーカイブフラグも付いていないときだけ使う。
+fallback:
+  - prefix: "veil-"
+    group_id: veil
+
+# オーナーが apply-topics.sh で付ける予定のトピック。
+# スクリプトの本番実行は GitHub API 上の topics を見る。
+# ローカルで完成形を見るときだけ --overlay-assignments でこの表を足す。
+assignments:
+  # group-veil
+  - repo: veil-rs
+    topic: group-veil
+  - repo: veil-drop
+    topic: group-veil
+  - repo: veil-tell
+    topic: group-veil
+  - repo: veil-warden
+    topic: group-veil
+  - repo: veil-db-guard
+    topic: group-veil
+  - repo: veil-decoy
+    topic: group-veil
+  - repo: veil-vault
+    topic: group-veil
+  - repo: veil-arena
+    topic: group-veil
+  - repo: veil-keeper
+    topic: group-veil
+  - repo: leak-fence
+    topic: group-veil
+  - repo: zt-gateway
+    topic: group-veil
+  # group-devtools
+  - repo: ci-self-runner
+    topic: group-devtools
+  - repo: crossport
+    topic: group-devtools
+  - repo: ops-whisper
+    topic: group-devtools
+  - repo: rec-watch
+    topic: group-devtools
+  - repo: bitshave
+    topic: group-devtools
+  - repo: webp-guard
+    topic: group-devtools
+  - repo: readme-gif-crafter
+    topic: group-devtools
+  - repo: npm-package-template
+    topic: group-devtools
+  - repo: xc-ops-bridge
+    topic: group-devtools
+  - repo: image-drop-input
+    topic: group-devtools
+  - repo: specbackfill
+    topic: group-devtools
+  - repo: local-ai-review
+    topic: group-devtools
+  - repo: review-firewall
+    topic: group-devtools
+  - repo: google-apple-cloudflare-whitelist
+    topic: group-devtools
+  - repo: ".github"
+    topic: group-devtools
+  # group-japan-data
+  - repo: postal_converter_ja
+    topic: group-japan-data
+  - repo: station_converter_ja
+    topic: group-japan-data
+  - repo: geo-line-ranker
+    topic: group-japan-data
+  # group-macos
+  - repo: still
+    topic: group-macos
+  - repo: md-viewer
+    topic: group-macos
+  - repo: prompt-recipe
+    topic: group-macos
+  # group-lab
+  - repo: loto_cli
+    topic: group-lab
+  - repo: claude_ai_my_optim
+    topic: group-lab
+  - repo: memory-lifeboat
+    topic: group-lab
+  # group-archive（GitHub上で Archived のものはトピックなしでもアーカイブ欄へ入る）
+  - repo: drop-squash
+    topic: group-archive
+  - repo: patchgate
+    topic: group-archive
+  - repo: sns-signal-studio
+    topic: group-archive
+  - repo: software-satellite-lab
+    topic: group-archive
+  - repo: veil-L7
+    topic: group-archive
+  - repo: veil-blackhole
+    topic: group-archive
+  - repo: veil-env
+    topic: group-archive
+  - repo: veil-mesh-consensus
+    topic: group-archive
+  - repo: musubi-foundation
+    topic: group-archive
+  - repo: pi-musubi-core
+    topic: group-archive

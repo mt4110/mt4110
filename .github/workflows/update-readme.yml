@@ -1,0 +1,61 @@
+# プロフィール README のリポジトリ一覧を毎日更新する。
+# 権限は contents: write のみ。外部 Action は actions/checkout だけを使う。
+#
+# 他リポジトリの作成や topic 変更では起動しない。
+# そのイベントをこのリポジトリへ届けるには、送り手側に PAT などの資格情報が要る。
+# 資格情報を増やさず、他リポジトリも変更しないため、毎日の schedule と手動実行だけにする。
+name: Update profile README
+
+on:
+  schedule:
+    # 09:17 Asia/Tokyo（UTC 00:17）。正時を避けてずらしている。
+    # GitHub の schedule は混雑時に遅れることがある。
+    - cron: "17 0 * * *"
+  workflow_dispatch:
+
+# 手動実行と schedule が重なったとき、走っている方を待ってから次を走らせる。
+concurrency:
+  group: update-profile-readme
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # actions/checkout v7.0.1
+      # タグ v7.0.1 / v7 はコミット 3d3c42e5aac5ba805825da76410c181273ba90b1 を指す（lightweight tag）。
+      # 確認: https://github.com/actions/checkout/releases/tag/v7.0.1
+      #       https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1
+      # コミット日 2026-07-17、リリース公開 2026-07-20、署名 verified。
+      # 2026-11-24 時点で latest release は v7.0.1 のまま。
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check grouping rules
+        env:
+          PYTHONUTF8: "1"
+        run: python3 scripts/test_update_readme.py
+
+      - name: Generate repository list
+        env:
+          PYTHONUTF8: "1"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/update_readme.py
+
+      - name: Commit if the list changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git commit -m "chore: update profile repository list"
+          git push
