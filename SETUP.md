@@ -16,15 +16,15 @@
    ./apply-topics.sh --apply
    ```
 
-   `gh` へのログインが必要です。既存のトピックは消しません。`bash` 3.2 でも動きます。アーカイブ済みリポジトリへ topic を付けられるかは、未確認です。付かなくても、GitHub 上で Archived ならアーカイブ欄へ自動で入ります。
+   `gh` へのログインが必要です。既存のトピックは消しません。`bash` 3.2 でも動きます。アーカイブ済みリポジトリは変更せず、自動でアーカイブ欄に表示します。適用前に全対象を確認し、非公開・フォーク・競合するグループ用トピックなどがあれば、変更を開始せずに停止します。
 
-2. `main` にマージする。リポジトリの Actions を許可する。Settings → Actions → General → Workflow permissions が **Read and write** であることを確認する（ここが Read だけだと、workflow は一覧を作れても push できません）。
+2. `main` にマージする。リポジトリの Actions を許可する。リポジトリ全体の既定権限を **Read and write** に変更する必要はありません。この workflow には `contents: write` が明示されています。組織ポリシーやブランチ保護で push が拒否された場合は、これらを緩めずに失敗内容を確認します。
 
 3. Actions タブから `Update profile README` を `workflow_dispatch` で一度回し、コミットが入るか確認する。内容が同じならコミットは作られません。
 
 4. [github.com/mt4110](https://github.com/mt4110) を開いて、プロフィールに一覧が出ているか見る。
 
-ブランチ保護を付ける場合は、github-actions[bot] が `README.md` を push できる設定にしてください。
+ブランチ保護やルールセットが直接 push を禁止している場合、この workflow の push も失敗します。
 
 `apply-topics.sh --apply` は、このリポジトリ以外の公開リポジトリを変更します。CI からは呼びません。
 
@@ -40,7 +40,7 @@
 
 他のリポジトリを作った瞬間や、topic を付けた瞬間に、この workflow を起動することはできません。GitHub Actions には「自分の別リポジトリが変わったら」というイベントがなく、公開イベントにも topic の変更は出てきません。別リポジトリから `workflow_dispatch` を叩くには、このリポジトリへ書き込める PAT などが送り手側に必要です。資格情報を増やさず、他リポジトリにも workflow を足さないため、起動は毎日 9:17（日本時間）ごろの schedule と、手動の `workflow_dispatch` だけにしています。schedule は GitHub 側の混雑で遅れることがあります。すぐ反映したいときは手動で回してください。
 
-`musubi-foundation` と `pi-musubi-core` は、いま GitHub 上で Archived です。反例としてアーカイブ欄に残すため、`group-archive` も assignments に入れています。Archive を外したあともアーカイブ欄に置くためのもので、外すかどうかは別に判断してください。
+`musubi-foundation` と `pi-musubi-core` は、いま GitHub 上で Archived です。反例としてアーカイブ欄に残すため、`group-archive` も assignments に入れています。アーカイブを解除する場合は自動適用の対象外として停止するので、残すグループを確認し、必要なら手動で設定してください。
 
 ## グループとトピック
 
@@ -87,7 +87,7 @@
 ローカルで、トピックを付ける前に完成形を見るとき:
 
 ```bash
-python3 scripts/update_readme.py --overlay-assignments
+python3 scripts/update_readme.py --dry-run --overlay-assignments
 ```
 
 `--overlay-assignments` は CI では使いません。本番は GitHub API が返す topics だけを見ます。

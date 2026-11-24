@@ -75,24 +75,60 @@ if [[ "$APPLY" -eq 1 ]]; then
     echo "gh にログインしてから再実行してください（gh auth login）" >&2
     exit 1
   fi
+  if [[ "$(gh api user --jq .login)" != mt4110 ]]; then
+    echo "Expected GitHub account mt4110." >&2
+    exit 1
+  fi
 fi
 
-failed=0
+# Read and validate every target before making any changes.
+PENDING=()
 for line in "${LINES[@]}"; do
   repo="${line%%$'\t'*}"
   topic="${line#*$'\t'}"
   if [[ "$APPLY" -eq 0 ]]; then
-    echo "gh repo edit ${repo} --add-topic ${topic}"
-  else
-    echo "adding ${topic} -> ${repo}"
-    if ! gh repo edit "${repo}" --add-topic "${topic}"; then
-      echo "FAILED: ${repo}" >&2
-      failed=$((failed + 1))
-    fi
+    printf '%s -> %s (live checks on --apply)\n' "$repo" "$topic"
+    continue
   fi
+  metadata="$(gh api "repos/${repo}" --jq '[.full_name, .visibility, (.fork|tostring), (.archived|tostring), ((.permissions.admin // false)|tostring), ((.topics // [])|join(","))] | join("|")')" || exit 1
+  IFS='|' read -r canonical visibility fork archived admin topics <<< "$metadata"
+  if [[ "$canonical" != "$repo" || "$visibility" != public || "$fork" != false ]]; then
+    echo "Refusing to edit invalid target: $repo" >&2
+    exit 1
+  fi
+  if [[ "$archived" == true ]]; then
+    echo "Skipping archived repository: $repo"
+    continue
+  fi
+  if [[ "$archived" != false || "$admin" != true || "$topic" == group-archive ]]; then
+    echo "Refusing to edit unexpected target: $repo" >&2
+    exit 1
+  fi
+  already=0
+  IFS=',' read -r -a existing <<< "$topics"
+  for t in ${existing[@]+"${existing[@]}"}; do
+    if [[ "$t" == "$topic" ]]; then
+      already=1
+    elif [[ "$t" == group-* ]]; then
+      echo "Conflicting group topic on $repo: $t" >&2
+      exit 1
+    fi
+  done
+  if [[ "$already" -eq 1 ]]; then
+    echo "Already assigned: $repo"
+    continue
+  fi
+  PENDING+=("$line")
 done
-
-if [[ "$APPLY" -eq 1 && "$failed" -gt 0 ]]; then
-  echo "${failed} 件失敗しました" >&2
-  exit 1
+if [[ "$APPLY" -eq 0 ]]; then
+  exit 0
 fi
+for line in ${PENDING[@]+"${PENDING[@]}"}; do
+  repo="${line%%$'\t'*}"
+  topic="${line#*$'\t'}"
+  echo "adding $topic -> $repo"
+  gh repo edit "$repo" --add-topic "$topic" || {
+    echo "Stopped at $repo. Prior successful changes are retained; recheck before retrying." >&2
+    exit 1
+  }
+done
